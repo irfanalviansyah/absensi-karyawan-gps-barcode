@@ -124,6 +124,51 @@ class ScanComponent extends Component
         ];
     }
 
+    public function manualClockIn()
+    {
+        if (is_null($this->shift_id)) {
+            session()->flash('error', 'Pilih shift terlebih dahulu');
+            return;
+        }
+
+        $existingAttendance = Attendance::where('user_id', Auth::user()->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if ($existingAttendance && $existingAttendance->time_out) {
+            session()->flash('error', 'Anda sudah absen masuk dan keluar hari ini');
+            return;
+        }
+
+        if (!$existingAttendance) {
+            $now = Carbon::now();
+            $shift = Shift::find($this->shift_id);
+            $status = Carbon::now()->setTimeFromTimeString($shift->start_time)->lt($now) ? 'late' : 'present';
+
+            $attendance = Attendance::create([
+                'user_id' => Auth::user()->id,
+                'date' => $now->format('Y-m-d'),
+                'time_in' => $now->format('H:i:s'),
+                'shift_id' => $shift->id,
+                'latitude' => $this->currentLiveCoords[0] ?? null,
+                'longitude' => $this->currentLiveCoords[1] ?? null,
+                'status' => $status,
+            ]);
+            $this->setAttendance($attendance);
+            $this->successMsg = __('Attendance In Successful');
+        } else {
+            $now = Carbon::now();
+            $existingAttendance->update([
+                'time_out' => $now->format('H:i:s'),
+                'status' => $existingAttendance->status === 'incomplete' ? 'present' : $existingAttendance->status,
+            ]);
+            $this->setAttendance($existingAttendance->fresh());
+            $this->successMsg = __('Attendance Out Successful');
+        }
+
+        Attendance::clearUserAttendanceCache(Auth::user(), Carbon::now());
+    }
+
     public function mount()
     {
         $this->shifts = Shift::all();

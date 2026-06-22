@@ -138,6 +138,30 @@
 
       <hr class="my-4">
 
+      {{-- Manual clock in/out button --}}
+      @if (!$isAbsence)
+        <div class="my-4">
+          @if (!$attendance || !$attendance->time_in)
+            <button wire:click="manualClockIn"
+              class="w-full rounded-md bg-green-600 px-4 py-3 text-center font-semibold text-white shadow-md hover:bg-green-700">
+              ⏰ Absen Masuk (Manual)
+            </button>
+          @elseif (!$attendance->time_out)
+            <button wire:click="manualClockIn"
+              wire:confirm="Anda yakin ingin absen keluar?"
+              class="w-full rounded-md bg-red-600 px-4 py-3 text-center font-semibold text-white shadow-md hover:bg-red-700">
+              ⏰ Absen Keluar (Manual)
+            </button>
+          @else
+            <div class="w-full rounded-md bg-gray-300 px-4 py-3 text-center font-semibold text-gray-600">
+              ✅ Sudah Absen Hari Ini
+            </div>
+          @endif
+        </div>
+      @endif
+
+      <hr class="my-4">
+
       <div class="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-3" wire:ignore>
         <a href="{{ route('apply-leave') }}">
           <div
@@ -171,7 +195,7 @@
     getLocation();
 
     async function getLocation() {
-      if (navigator.geolocation && location.protocol === 'https:' || location.hostname === 'localhost') {
+      if (navigator.geolocation && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname.match(/^[\d.]+$/))) {
         const map = L.map('currentMap');
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 21,
