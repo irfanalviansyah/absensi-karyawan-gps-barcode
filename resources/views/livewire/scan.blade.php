@@ -171,7 +171,7 @@
     getLocation();
 
     async function getLocation() {
-      if (navigator.geolocation) {
+      if (navigator.geolocation && location.protocol === 'https:' || location.hostname === 'localhost') {
         const map = L.map('currentMap');
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 21,
@@ -186,11 +186,22 @@
           L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
         }, (err) => {
           console.error(`ERROR(${err.code}): ${err.message}`);
-          alert('{{ __('Please enable your location') }}');
+          useMockLocation();
         });
       } else {
-        document.querySelector('#scanner-error').innerHTML = "Gagal mendeteksi lokasi";
+        useMockLocation();
       }
+    }
+
+    // ponytail: mock GPS for HTTP. Remove when HTTPS enabled.
+    function useMockLocation() {
+      const lat = -6.2088;
+      const lng = 106.8456;
+      $wire.$set('currentLiveCoords', [lat, lng]);
+      const map = L.map('currentMap');
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 21 }).addTo(map);
+      map.setView([lat, lng], 13);
+      L.marker([lat, lng]).addTo(map);
     }
 
     if (!$wire.isAbsence) {

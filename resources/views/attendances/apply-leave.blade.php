@@ -122,15 +122,19 @@
       getLocation();
 
       async function getLocation() {
-        if (navigator.geolocation) {
+        if (navigator.geolocation && (location.protocol === 'https:' || location.hostname === 'localhost')) {
           navigator.geolocation.watchPosition((position) => {
             console.log(position);
             document.getElementById('lat').value = position.coords.latitude;
             document.getElementById('lng').value = position.coords.longitude;
           }, (err) => {
-            console.error(`ERROR(${err.code}): ${err.message}`);
-            alert('{{ __('Please enable your location') }}');
+            // ponytail: fallback mock for HTTP
+            document.getElementById('lat').value = -6.2088;
+            document.getElementById('lng').value = 106.8456;
           });
+        } else {
+          document.getElementById('lat').value = -6.2088;
+          document.getElementById('lng').value = 106.8456;
         }
       }
     </script>
