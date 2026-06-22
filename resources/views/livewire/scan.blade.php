@@ -241,7 +241,9 @@
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 21 }).addTo(map);
       map.setView([lat, lng], 16);
       L.marker([lat, lng]).addTo(map);
-      reverseGeocode(lat, lng);
+      // Set address directly - PT location
+      const el = document.getElementById('address-display');
+      if (el) el.textContent = 'PT Sinar Surya Chemindo, Cangkuang Kulon, Kec. Cangkuang, Kabupaten Bandung, Jawa Barat';
     }
 
     if (!$wire.isAbsence) {
