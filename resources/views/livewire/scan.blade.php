@@ -138,19 +138,19 @@
 
       <hr class="my-4">
 
-      {{-- Manual clock in/out button --}}
+      {{-- Clock in/out button --}}
       @if (!$isAbsence)
         <div class="my-4">
           @if (!$attendance || !$attendance->time_in)
             <button wire:click="manualClockIn"
               class="w-full rounded-md bg-green-600 px-4 py-3 text-center font-semibold text-white shadow-md hover:bg-green-700">
-              ⏰ Absen Masuk (Manual)
+              Absen Masuk
             </button>
           @elseif (!$attendance->time_out)
             <button wire:click="manualClockIn"
               wire:confirm="Anda yakin ingin absen keluar?"
               class="w-full rounded-md bg-red-600 px-4 py-3 text-center font-semibold text-white shadow-md hover:bg-red-700">
-              ⏰ Absen Keluar (Manual)
+              Absen Keluar
             </button>
           @else
             <div class="w-full rounded-md bg-gray-300 px-4 py-3 text-center font-semibold text-gray-600">
