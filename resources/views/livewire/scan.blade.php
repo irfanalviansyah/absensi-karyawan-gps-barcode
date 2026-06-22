@@ -78,8 +78,10 @@
               <x-heroicon-s-chevron-down class="mr-2 h-5 w-5" />
             </button>
           </div>
+          <p id="address-display" class="text-sm font-normal text-gray-500 dark:text-gray-400 mt-1">Memuat alamat...</p>
         @else
           {{ __('Your location') . ': -, -' }}
+          <p id="address-display" class="text-sm font-normal text-gray-500 dark:text-gray-400 mt-1"></p>
         @endif
         <div class="my-6 h-72 w-full md:h-96" id="currentMap" wire:ignore></div>
       </h4>
@@ -206,8 +208,9 @@
           map.setView([
             Number(position.coords.latitude),
             Number(position.coords.longitude),
-          ], 13);
+          ], 16);
           L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
+          reverseGeocode(position.coords.latitude, position.coords.longitude);
         }, (err) => {
           console.error(`ERROR(${err.code}): ${err.message}`);
           useMockLocation();
@@ -217,15 +220,28 @@
       }
     }
 
+    async function reverseGeocode(lat, lng) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`);
+        const data = await res.json();
+        const addr = data.display_name || '-';
+        const el = document.getElementById('address-display');
+        if (el) el.textContent = addr;
+      } catch (e) {
+        console.error('Geocode error:', e);
+      }
+    }
+
     // ponytail: mock GPS for HTTP. Remove when HTTPS enabled.
     function useMockLocation() {
-      const lat = -6.2088;
-      const lng = 106.8456;
+      const lat = -7.0797;
+      const lng = 107.5883;
       $wire.$set('currentLiveCoords', [lat, lng]);
       const map = L.map('currentMap');
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 21 }).addTo(map);
-      map.setView([lat, lng], 13);
+      map.setView([lat, lng], 16);
       L.marker([lat, lng]).addTo(map);
+      reverseGeocode(lat, lng);
     }
 
     if (!$wire.isAbsence) {
